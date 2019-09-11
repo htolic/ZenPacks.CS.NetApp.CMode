@@ -1,0 +1,17 @@
+/*.egg-info/
+/build/
+/dist/
+*.py[cod]
+
+#*~
+#*.swp
+#*.log
+#.version
+#*.egg
+#eggs
+#*.bak
+#.DS_Store
+#.idea/
+#.pydevproject
+#.project
+#.vscode

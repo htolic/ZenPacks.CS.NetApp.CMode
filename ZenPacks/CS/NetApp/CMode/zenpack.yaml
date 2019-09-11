@@ -1,1 +1,216 @@
 name: ZenPacks.CS.NetApp.CMode
+
+device_classes:
+  /Storage/NetApp/CMode:
+    remove: true
+    zProperties:
+      zSnmpMonitorIgnore: true
+      zPythonClass: ZenPacks.CS.NetApp.CMode.NetAppDevice
+      zDeviceTemplates: {}
+      zCollectorPlugins:
+        - CS.NetApp.CMode.Device
+        - CS.NetApp.CMode.License
+        - CS.NetApp.CMode.Node
+        - CS.NetApp.CMode.Storage
+
+zProperties:
+  DEFAULTS:
+    category: NetApp
+  zNetAppAPI:
+    label: URL to API (usually https://hostname/api)
+    description: If left empty, it fallbacks to https://${device.manageIp}/api
+  zNetAppUser:
+    label: User with API read rights access
+    description: Authorization to call API endpoints
+  zNetAppPassword:
+    label: Password for the user
+    description: Authorization to call API endpoints
+    type: password
+
+classes:
+  NetAppDevice:
+    base: [zenpacklib.Device]
+    label: NetApp
+
+  License:
+    base: [zenpacklib.Component]
+    label: License
+
+    properties:
+      license_name:
+        label: License Name
+      scope:
+        label: Scope
+      state:
+        label: State
+      owner:
+        label: Owner
+      serial_number:
+        label: Serial Number
+      active:
+        label: Active
+      evaluation:
+        label: Evaluation
+      compliance:
+        label: Compliance
+
+  Node:
+    base: [zenpacklib.Component]
+    label: Node
+
+    properties:
+      node_name:
+        label: Node Name
+      serial_number:
+        label: Serial Number
+      location:
+        label: Location
+      model:
+        label: Model
+      version:
+        label: Version
+      membership:
+        label: Membership
+
+  Aggregate:
+    base: [zenpacklib.Component]
+    label: Aggregate
+
+    properties:
+      aggr_name:
+        label: Aggregate Name
+      aggr_state:
+        label: Aggregate State
+      raid_size:
+        label: RAID Size
+      disk_count:
+        label: Disk Count
+      total_bytes:
+        label: Total Bytes
+        renderer: Zenoss.render.bytesString
+
+  Disk:
+    base: [zenpacklib.Component]
+    label: Disk
+
+    properties:
+      disk_name:
+        label: Disk Name
+      disk_uid:
+        label: Disk UID
+      node:
+        label: Node
+      raid_state:
+        label: RAID State
+      raid_type:
+        label: RAID Type
+      bay:
+        label: Bay
+      byte_per_sector:
+        label: Byte Per Sector
+      disk_type:
+        label: Disk Type
+      rpm:
+        label: RPMs
+      model:
+        label: Model
+      serialnr:
+        label: Serial Number
+      firmware:
+        label: Firmware
+      poweron_hours:
+        label: Poweron Hours
+      grown_defect_list_count:
+        label: Grown Defect List Count
+      total_bytes:
+        label: Total Bytes
+
+  Plex:
+    base: [zenpacklib.Component]
+    label: Plex
+    plural_label: Plexes
+
+    properties:
+      plex_name:
+        label: Plex Name
+      plex_state:
+        label: Plex State
+
+  RaidGroup:
+    base: [zenpacklib.Component]
+    label: RaidGroup
+
+    properties:
+      rg_name:
+        label: RAID Group Name
+
+  SpareDisk:
+    base: [zenpacklib.Component]
+    label: SpareDisk
+
+    properties:
+      sparedisk_name:
+        label: Spare Disk Name
+      disk_uid:
+        label: Disk UID
+      node:
+        label: Node
+      raid_state:
+        label: RAID State
+      raid_type:
+        label: RAID Type
+      bay:
+        label: Bay
+      byte_per_sector:
+        label: Byte Per Sector
+      disk_type:
+        label: Disk Type
+      rpm:
+        label: RPMs
+      model:
+        label: Model
+      serialnr:
+        label: Serial Number
+      firmware:
+        label: Firmware
+      poweron_hours:
+        label: Poweron Hours
+      grown_defect_list_count:
+        label: Grown Defect List Count
+      total_bytes:
+        label: Total Bytes
+
+  Volume:
+    base: [zenpacklib.Component]
+    label: Volume
+
+    properties:
+      volume_name:
+        label: Volume Name
+      volume_type:
+        label: Volume Type
+      block_type:
+        label: Block Type
+      volume_state:
+        label: Volume State
+      mirror_status:
+        label: Mirror Status
+      inconsistent:
+        label: Inconsistent
+      unrecoverable:
+        label: Unrecoverable
+      invalid:
+        label: Invalid
+      total_bytes:
+        label: Total Bytes
+
+class_relationships:
+  - NetAppDevice 1:MC License
+  - NetAppDevice 1:MC Node
+  - NetAppDevice 1:MC Aggregate
+  - Aggregate 1:MC Plex
+  - Aggregate 1:MC Volume
+  - Aggregate 1:MC SpareDisk
+  - Plex 1:MC RaidGroup
+  - RaidGroup 1:MC Disk
+
