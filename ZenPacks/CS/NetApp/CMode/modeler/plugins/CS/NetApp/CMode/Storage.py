@@ -56,7 +56,7 @@ class Storage(PythonPlugin):
             log.error('%s: %s', device.id, e)
             returnValue(None)
 
-        maps = []
+        rm = self.relMap()
         for record in response['records']:
             om = self.objectMap()
             om.id = self.prepId(record['name'])
@@ -65,18 +65,15 @@ class Storage(PythonPlugin):
             om.raid_size = record['block_storage']['primary']['raid_size']
             om.disk_count = record['block_storage']['primary']['disk_count']
             om.total_bytes = record['space']['block_storage']['size']
-            maps.append(om)
+            rm.append(om)
 
             compname = 'aggregates/{0}'.format(om.id)
-            plexrm = self.plexes(device, record['uuid'], baseUrl, auth, compname, log)
-            maps.extend(plexrm)
+            plexrm = yield self.plexes(device, record['uuid'], baseUrl, auth, compname, log)
 
             compname = 'aggregates/{0}'.format(om.id)
-            volumerm = self.volumes(device, record['uuid'], baseUrl, auth, compname, log)
-            maps.extend(volumerm)
+            volumerm = yield self.volumes(device, record['uuid'], baseUrl, auth, compname, log)
 
-        log.info(maps)
-        returnValue(maps)
+        returnValue([rm] + [plexrm] + [volumerm])
 
     def process(self, device, results, log):
         """Process results. Return iterable of datamaps or None."""
@@ -91,11 +88,6 @@ class Storage(PythonPlugin):
             log.error('%s: %s', device.id, e)
             returnValue(None)
 
-        log.error(response)
-
-        obj_maps = []
-        rel_maps = []
-
         rm = RelationshipMap()
         rm.compname = compname
         rm.relname = 'plexs'
@@ -108,10 +100,9 @@ class Storage(PythonPlugin):
             om.id = self.prepId(record['name'])
             om.plex_name = record['name']
             om.plex_state = record['state']
-            obj_maps.append(om)
-        rm.objmaps = obj_maps
-
-        returnValue([rm] + rel_maps)
+            rm.append(om)
+        
+        returnValue(rm)
 
     @inlineCallbacks
     def volumes(self, device, uuid, baseUrl, auth, compname, log):
@@ -121,9 +112,6 @@ class Storage(PythonPlugin):
         except Exception, e:
             log.error('%s: %s', device.id, e)
             returnValue(None)
-
-        obj_maps = []
-        rel_maps = []
 
         rm = RelationshipMap()
         rm.compname = compname
@@ -137,7 +125,6 @@ class Storage(PythonPlugin):
             om.id = self.prepId(record['name'])
             om.plex_name = record['name']
             om.plex_state = record['state']
-            obj_maps.append(om)
-        rm.objmaps = obj_maps
+            rm.append(om)
 
-        returnVelue([rm] + rel_maps)
+        returnValue(rm)
