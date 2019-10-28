@@ -56,8 +56,7 @@ class Storage(PythonPlugin):
             log.error('%s: %s', device.id, e)
             returnValue(None)
 
-        rms = []
-        rm = self.relMap()
+        maps = []
         for record in response['records']:
             om = self.objectMap()
             om.id = self.prepId(record['name'])
@@ -66,19 +65,18 @@ class Storage(PythonPlugin):
             om.raid_size = record['block_storage']['primary']['raid_size']
             om.disk_count = record['block_storage']['primary']['disk_count']
             om.total_bytes = record['space']['block_storage']['size']
-            rm.append(om)
+            maps.append(om)
 
             compname = 'aggregates/{0}'.format(om.id)
-            plexrm = yield self.plexes(device, record['uuid'], baseUrl, auth, compname, log)
-            rms.append(plexrm)
+            plexrm = self.plexes(device, record['uuid'], baseUrl, auth, compname, log)
+            maps.extend(plexrm)
 
             compname = 'aggregates/{0}'.format(om.id)
-            volumerm = yield self.volumes(device, record['uuid'], baseUrl, auth, compname, log)
-            rms.append(volumerm)
+            volumerm = self.volumes(device, record['uuid'], baseUrl, auth, compname, log)
+            maps.extend(volumerm)
 
-        rms.append(rm)
-        log.info(rms)
-        returnValue(rms)
+        log.info(maps)
+        returnValue(maps)
 
     def process(self, device, results, log):
         """Process results. Return iterable of datamaps or None."""
@@ -93,19 +91,27 @@ class Storage(PythonPlugin):
             log.error('%s: %s', device.id, e)
             returnValue(None)
 
+        log.error(response)
+
+        obj_maps = []
+        rel_maps = []
+
         rm = RelationshipMap()
         rm.compname = compname
         rm.relname = 'plexs'
         rm.modname = 'ZenPacks.CS.NetApp.CMode.Plex'
         rm.classname = 'Plex'
+
         for record in response['records']:
             om = ObjectMap()
             om.modname = 'ZenPacks.CS.NetApp.CMode.Plex'
             om.id = self.prepId(record['name'])
             om.plex_name = record['name']
             om.plex_state = record['state']
-            rm.append(om)
-        returnValue(rm)
+            obj_maps.append(om)
+        rm.objmaps = obj_maps
+
+        returnValue([rm] + rel_maps)
 
     @inlineCallbacks
     def volumes(self, device, uuid, baseUrl, auth, compname, log):
@@ -116,16 +122,22 @@ class Storage(PythonPlugin):
             log.error('%s: %s', device.id, e)
             returnValue(None)
 
+        obj_maps = []
+        rel_maps = []
+
         rm = RelationshipMap()
         rm.compname = compname
         rm.relname = 'volumes'
         rm.modname = 'ZenPacks.CS.NetApp.CMode.Volume'
         rm.classname = 'Volume'
+
         for record in response['records']:
             om = ObjectMap()
             om.modname = 'ZenPacks.CS.NetApp.CMode.Volume'
             om.id = self.prepId(record['name'])
             om.plex_name = record['name']
             om.plex_state = record['state']
-            rm.append(om)
-        returnValue(rm)
+            obj_maps.append(om)
+        rm.objmaps = obj_maps
+
+        returnVelue([rm] + rel_maps)
