@@ -14,11 +14,11 @@ from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
 
 
-class Node(PythonPlugin):
+class ClusterNode(PythonPlugin):
     """NetApp CMode modeler plugin."""
 
-    relname = 'nodes'
-    modname = 'ZenPacks.CS.NetApp.CMode.Node'
+    relname = 'clusterNodes'
+    modname = 'ZenPacks.CS.NetApp.CMode.ClusterNode'
 
     requiredProperties = (
         'zNetAppAPI',
@@ -56,19 +56,47 @@ class Node(PythonPlugin):
             log.error('%s: %s', device.id, e)
             returnValue(None)
 
-        rm = self.relMap()
+        noderm = self.relMap()
         for record in response['records']:
             om = self.objectMap()
-            om.id = self.prepId(record['name'])
+            om.id = self.prepId(record['uuid'])
             om.node_name = record['name']
             om.serial_number = record['serial_number']
             om.location = record['location']
             om.model = record['model']
             om.version = record['version']['full']
             om.membership = record['membership']
-            rm.append(om)
-        returnValue(rm)
+            noderm.append(om)
+
+            compname = 'clusterNodes/{0}'.format(om.id)
+            sparerm = yield self.spares(device, record['uuid'], baseUrl, auth, compname, log)
+
+        returnValue([noderm] + [sparerm])
 
     def process(self, device, results, log):
         """Process results. Return iterable of datamaps or None."""
         return results
+
+    @inlineCallbacks
+    def spares(self, device, uuid, baseUrl, auth, compname, log):
+        try:
+            response = yield getPage('{url}/storage/disks?state=spare&fields=*&return_records=true&return_timeout=15'.format(url=baseUrl), headers=auth)
+            response = json.loads(response)
+        except Exception, e:
+            log.error('%s: %s', device.id, e)
+            returnValue(None)
+
+        rm = RelationshipMap()
+        rm.compname = compname
+        rm.relname = 'spareDisks'
+        rm.modname = 'ZenPacks.CS.NetApp.CMode.SpareDisk'
+        rm.classname = 'SpareDisk'
+
+        for record in response['records']:
+            om = ObjectMap()
+            om.modname = 'ZenPacks.CS.NetApp.CMode.SpareDisk'
+            om.id = self.prepId(record['serial_number'])
+            rm.append(om)
+        
+        log.error(rm)
+        returnValue(rm)

@@ -69,8 +69,6 @@ class Storage(PythonPlugin):
 
             compname = 'aggregates/{0}'.format(om.id)
             plexrm = yield self.plexes(device, record['uuid'], baseUrl, auth, compname, log)
-
-            compname = 'aggregates/{0}'.format(om.id)
             volumerm = yield self.volumes(device, record['uuid'], baseUrl, auth, compname, log)
 
         returnValue([rm] + [plexrm] + [volumerm])
@@ -98,8 +96,6 @@ class Storage(PythonPlugin):
             om = ObjectMap()
             om.modname = 'ZenPacks.CS.NetApp.CMode.Plex'
             om.id = self.prepId(record['name'])
-            om.plex_name = record['name']
-            om.plex_state = record['state']
             rm.append(om)
         
         returnValue(rm)
@@ -107,7 +103,7 @@ class Storage(PythonPlugin):
     @inlineCallbacks
     def volumes(self, device, uuid, baseUrl, auth, compname, log):
         try:
-            response = yield getPage('{url}/storage/volumes?fields=statistics.status,error_state,snaplock,tiering,state,size,movement,space,application,nas,clone,flexcache_endpoint_type,autosize,style&return_records=true&return_timeout=15'.format(url=baseUrl,oid=uuid), headers=auth)
+            response = yield getPage('{url}/storage/volumes?fields=aggregates,statistics.status,error_state,snaplock,tiering,state,size,movement,space,application,nas,clone,flexcache_endpoint_type,autosize,style&return_records=true&return_timeout=15'.format(url=baseUrl,oid=uuid), headers=auth)
             response = json.loads(response)
         except Exception, e:
             log.error('%s: %s', device.id, e)
@@ -120,11 +116,10 @@ class Storage(PythonPlugin):
         rm.classname = 'Volume'
 
         for record in response['records']:
+            if uuid != record['aggregates'][0]['uuid']: continue
             om = ObjectMap()
             om.modname = 'ZenPacks.CS.NetApp.CMode.Volume'
             om.id = self.prepId(record['name'])
-            om.plex_name = record['name']
-            om.plex_state = record['state']
             rm.append(om)
 
         returnValue(rm)
