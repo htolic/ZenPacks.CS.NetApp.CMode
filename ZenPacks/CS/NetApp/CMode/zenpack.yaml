@@ -10,7 +10,7 @@ device_classes:
       zCollectorPlugins:
         - CS.NetApp.CMode.Device
         - CS.NetApp.CMode.License
-        - CS.NetApp.CMode.Node
+        - CS.NetApp.CMode.ClusterNode
         - CS.NetApp.CMode.Storage
 
 zProperties:
@@ -54,9 +54,10 @@ classes:
       compliance:
         label: Compliance
 
-  Node:
+  ClusterNode:
     base: [zenpacklib.Component]
-    label: Node
+    label: Cluster Node
+    plural_label: Cluster Nodes
 
     properties:
       node_name:
@@ -138,7 +139,8 @@ classes:
 
   RaidGroup:
     base: [zenpacklib.Component]
-    label: RaidGroup
+    label: Raid Group
+    plural_label: Raid Groups
 
     properties:
       rg_name:
@@ -146,7 +148,8 @@ classes:
 
   SpareDisk:
     base: [zenpacklib.Component]
-    label: SpareDisk
+    label: Spare Disk
+    plural_label: Spare Disks
 
     properties:
       sparedisk_name:
@@ -206,11 +209,11 @@ classes:
 
 class_relationships:
   - NetAppDevice 1:MC License
-  - NetAppDevice 1:MC Node
+  - NetAppDevice 1:MC ClusterNode
   - NetAppDevice 1:MC Aggregate
+  - ClusterNode 1:MC SpareDisk
   - Aggregate 1:MC Plex
   - Aggregate 1:MC Volume
-  - Aggregate 1:MC SpareDisk
   - Plex 1:MC RaidGroup
   - RaidGroup 1:MC Disk
 
