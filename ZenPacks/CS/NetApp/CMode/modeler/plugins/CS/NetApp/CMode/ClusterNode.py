@@ -98,5 +98,4 @@ class ClusterNode(PythonPlugin):
             om.id = self.prepId(record['serial_number'])
             rm.append(om)
         
-        log.error(rm)
         returnValue(rm)

@@ -53,8 +53,6 @@ class Device(PythonPlugin):
             log.error('%s: %s', device.id, e)
             returnValue(None)
 
-	log.info(response)
-
         om = self.objectMap(dict(
 	    setOSProductKey = response['version']['full'],
 	))

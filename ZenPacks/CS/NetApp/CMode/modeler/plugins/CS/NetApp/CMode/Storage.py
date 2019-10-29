@@ -68,10 +68,10 @@ class Storage(PythonPlugin):
             rm.append(om)
 
             compname = 'aggregates/{0}'.format(om.id)
-            plexrm = yield self.plexes(device, record['uuid'], baseUrl, auth, compname, log)
+            (plexrm, raidgrouprm, diskrm) = yield self.plexes(device, record['uuid'], baseUrl, auth, compname, log)
             volumerm = yield self.volumes(device, record['uuid'], baseUrl, auth, compname, log)
 
-        returnValue([rm] + [plexrm] + [volumerm])
+        returnValue([rm] + [plexrm] + [raidgrouprm] + [diskrm]  + [volumerm])
 
     def process(self, device, results, log):
         """Process results. Return iterable of datamaps or None."""
@@ -80,7 +80,7 @@ class Storage(PythonPlugin):
     @inlineCallbacks
     def plexes(self, device, uuid, baseUrl, auth, compname, log):
         try:
-            response = yield getPage('{url}/storage/aggregates/{oid}/plexes?fields=state&return_records=true&return_timeout=15'.format(url=baseUrl,oid=uuid), headers=auth)
+            response = yield getPage('{url}/storage/aggregates/{oid}/plexes?fields=state,raid_groups&return_records=true&return_timeout=15'.format(url=baseUrl,oid=uuid), headers=auth)
             response = json.loads(response)
         except Exception, e:
             log.error('%s: %s', device.id, e)
@@ -97,8 +97,11 @@ class Storage(PythonPlugin):
             om.modname = 'ZenPacks.CS.NetApp.CMode.Plex'
             om.id = self.prepId(record['name'])
             rm.append(om)
+
+            compname = '{parent}/plexs/{id}'.format(parent=compname, id=om.id)
+            raidgrouprm, diskrm = self.raidgroups(record['raid_groups'], compname, log)
         
-        returnValue(rm)
+        returnValue((rm, raidgrouprm, diskrm))
 
     @inlineCallbacks
     def volumes(self, device, uuid, baseUrl, auth, compname, log):
@@ -123,3 +126,37 @@ class Storage(PythonPlugin):
             rm.append(om)
 
         returnValue(rm)
+
+    def raidgroups(self, raidgroups, compname, log):
+        rm = RelationshipMap()
+        rm.compname = compname
+        rm.relname = 'raidGroups'
+        rm.modname = 'ZenPacks.CS.NetApp.CMode.RaidGroup'
+        rm.classname = 'RaidGroup'
+
+        for raid in raidgroups:
+            om = ObjectMap()
+            om.modname = 'ZenPacks.CS.NetApp.CMode.RaidGroup'
+            om.id = self.prepId(raid['name'])
+            rm.append(om)
+
+            compname = '{parent}/raidGroups/{id}'.format(parent=compname, id=om.id)
+            diskrm = self.disks(raid['disks'], compname, log)
+
+        return (rm, diskrm)
+
+    def disks(self, disks, compname, log):
+        rm = RelationshipMap()
+        rm.compname = compname
+        rm.relname = 'disks'
+        rm.modname = 'ZenPacks.CS.NetApp.CMode.Disk'
+        rm.classname = 'Disk'
+
+        for disk in disks:
+            om = ObjectMap()
+            om.modname = 'ZenPacks.CS.NetApp.CMode.Disk'
+            om.id = self.prepId(disk['disk']['name'])
+            rm.append(om)
+
+        return rm
+
