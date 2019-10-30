@@ -159,6 +159,11 @@ class Storage(PythonPlugin):
             om = ObjectMap()
             om.modname = 'ZenPacks.CS.NetApp.CMode.RaidGroup'
             om.id = self.prepId(raid['name'])
+            om.rg_name = raid['name']
+            om.cache_tier = raid['cache_tier']
+            om.degraded = raid['degraded']
+            om.recomputing_parity_active = raid['recomputing_parity']['active']
+            om.reconstruct_active = raid['reconstruct']['active']
             rm.append(om)
 
             compname = '{parent}/raidGroups/{id}'.format(parent=compname, id=om.id)
@@ -177,6 +182,11 @@ class Storage(PythonPlugin):
             om = ObjectMap()
             om.modname = 'ZenPacks.CS.NetApp.CMode.Disk'
             om.id = self.prepId(disk['disk']['name'])
+            om.disk_name = disk['disk']['name']
+            om.position = disk['position']
+            om.state = disk['state']
+            om.type = disk['type']
+            om.usable_size = disk['usable_size']
             rm.append(om)
 
         return rm

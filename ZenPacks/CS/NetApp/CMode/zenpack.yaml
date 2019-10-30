@@ -70,6 +70,7 @@ classes:
         label: Model
       version:
         label: Version
+        label_width: 280
       membership:
         label: Membership
 
@@ -97,34 +98,15 @@ classes:
     properties:
       disk_name:
         label: Disk Name
-      disk_uid:
-        label: Disk UID
-      node:
-        label: Node
-      raid_state:
-        label: RAID State
-      raid_type:
-        label: RAID Type
-      bay:
-        label: Bay
-      byte_per_sector:
-        label: Byte Per Sector
-      disk_type:
-        label: Disk Type
-      rpm:
-        label: RPMs
-      model:
-        label: Model
-      serialnr:
-        label: Serial Number
-      firmware:
-        label: Firmware
-      poweron_hours:
-        label: Poweron Hours
-      grown_defect_list_count:
-        label: Grown Defect List Count
-      total_bytes:
-        label: Total Bytes
+      position:
+        label: Position
+      state:
+        label: State
+      type:
+        label: Type
+      usable_size:
+        label: Usable Size
+        renderer: Zenoss.render.bytesString
 
   Plex:
     base: [zenpacklib.Component]
@@ -151,6 +133,17 @@ classes:
     properties:
       rg_name:
         label: RAID Group Name
+        label_width: 100
+      cache_tier:
+        label: Cache Tier
+      degraded:
+        label: Degraded
+      recomputing_parity_active:
+        label: Recomputing Parity Active
+        label_width: 120
+      reconstruct_active:
+        label: Reconstruct Active
+        label_width: 120
 
   SpareDisk:
     base: [zenpacklib.Component]
@@ -162,16 +155,19 @@ classes:
         label: Spare Disk Name
       disk_uid:
         label: Disk UID
+        grid_display: false
       serialnr:
         label: Serial Number
       model:
         label: Model
+        label_width: 110
       vendor:
         label: Vendor
       firmware:
         label: Firmware
       usable_size:
         label: Usable Size
+        renderer: Zenoss.render.bytesString
       rpm:
         label: RPMs
       type:
@@ -192,6 +188,7 @@ classes:
         label: Volume Name
       volume_uuid:
         label: Volume UUID
+        label_width: 220
       state:
         label: State
       style:
@@ -206,20 +203,25 @@ classes:
         label: NAS Path
       nas_security_style:
         label: NAS Security Style
+        label_width: 100
       snapshot_policy:
         label: Snapshot Policy
       svm:
         label: SVM
       size:
         label: Size
+        renderer: Zenoss.render.bytesString
       available:
         label: Available
+        renderer: Zenoss.render.bytesString
       used:
         label: Used
+        renderer: Zenoss.render.bytesString
       over_provisioned:
         label: Over Provisioned
       snapshot_reserve:
         label: Snapshot Reserve [%]
+        label_width: 100
 
 class_relationships:
   - NetAppDevice 1:MC License

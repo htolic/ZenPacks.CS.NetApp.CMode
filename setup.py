@@ -3,7 +3,7 @@
 # or saved.  Do not modify them directly here.
 # NB: PACKAGES is deprecated
 NAME = "ZenPacks.CS.NetApp.CMode"
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 AUTHOR = "htolic"
 LICENSE = "GPLv2"
 NAMESPACE_PACKAGES = ['ZenPacks', 'ZenPacks.CS', 'ZenPacks.CS.NetApp']
