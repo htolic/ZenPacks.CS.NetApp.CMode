@@ -45,8 +45,10 @@ classes:
         label: State
       owner:
         label: Owner
+        label_width: 110
       serial_number:
         label: Serial Number
+        label_width: 200
       active:
         label: Active
       evaluation:
@@ -62,6 +64,7 @@ classes:
     properties:
       node_name:
         label: Node Name
+        label_width: 100
       serial_number:
         label: Serial Number
       location:
@@ -186,6 +189,7 @@ classes:
     properties:
       volume_name:
         label: Volume Name
+        label_width: 120
       volume_uuid:
         label: Volume UUID
         label_width: 220
@@ -201,6 +205,7 @@ classes:
         label: Is flexclone?
       nas_path:
         label: NAS Path
+        label_width: 110
       nas_security_style:
         label: NAS Security Style
         label_width: 100
@@ -219,6 +224,7 @@ classes:
         renderer: Zenoss.render.bytesString
       over_provisioned:
         label: Over Provisioned
+        renderer: Zenoss.render.bytesString
       snapshot_reserve:
         label: Snapshot Reserve [%]
         label_width: 100
