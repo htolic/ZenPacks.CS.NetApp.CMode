@@ -134,8 +134,14 @@ classes:
     properties:
       plex_name:
         label: Plex Name
+      online:
+        label: Online
       plex_state:
         label: Plex State
+      pool:
+        label: Pool
+      resync:
+        label: Resync Active
 
   RaidGroup:
     base: [zenpacklib.Component]
@@ -156,32 +162,26 @@ classes:
         label: Spare Disk Name
       disk_uid:
         label: Disk UID
-      node:
-        label: Node
-      raid_state:
-        label: RAID State
-      raid_type:
-        label: RAID Type
-      bay:
-        label: Bay
-      byte_per_sector:
-        label: Byte Per Sector
-      disk_type:
-        label: Disk Type
-      rpm:
-        label: RPMs
-      model:
-        label: Model
       serialnr:
         label: Serial Number
+      model:
+        label: Model
+      vendor:
+        label: Vendor
       firmware:
         label: Firmware
-      poweron_hours:
-        label: Poweron Hours
-      grown_defect_list_count:
-        label: Grown Defect List Count
-      total_bytes:
-        label: Total Bytes
+      usable_size:
+        label: Usable Size
+      rpm:
+        label: RPMs
+      type:
+        label: Type
+      spare_class:
+        label: Class
+      pool:
+        label: Pool
+      bay:
+        label: Bay
 
   Volume:
     base: [zenpacklib.Component]
@@ -190,22 +190,36 @@ classes:
     properties:
       volume_name:
         label: Volume Name
-      volume_type:
-        label: Volume Type
-      block_type:
-        label: Block Type
-      volume_state:
-        label: Volume State
-      mirror_status:
-        label: Mirror Status
-      inconsistent:
-        label: Inconsistent
-      unrecoverable:
-        label: Unrecoverable
-      invalid:
-        label: Invalid
-      total_bytes:
-        label: Total Bytes
+      volume_uuid:
+        label: Volume UUID
+      state:
+        label: State
+      style:
+        label: Style
+      tiering_policy:
+        label: Tiering Policy
+      type:
+        label: Type
+      is_flexclone:
+        label: Is flexclone?
+      nas_path:
+        label: NAS Path
+      nas_security_style:
+        label: NAS Security Style
+      snapshot_policy:
+        label: Snapshot Policy
+      svm:
+        label: SVM
+      size:
+        label: Size
+      available:
+        label: Available
+      used:
+        label: Used
+      over_provisioned:
+        label: Over Provisioned
+      snapshot_reserve:
+        label: Snapshot Reserve [%]
 
 class_relationships:
   - NetAppDevice 1:MC License

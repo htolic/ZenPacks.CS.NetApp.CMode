@@ -80,7 +80,7 @@ class Storage(PythonPlugin):
     @inlineCallbacks
     def plexes(self, device, uuid, baseUrl, auth, compname, log):
         try:
-            response = yield getPage('{url}/storage/aggregates/{oid}/plexes?fields=state,raid_groups&return_records=true&return_timeout=15'.format(url=baseUrl,oid=uuid), headers=auth)
+            response = yield getPage('{url}/storage/aggregates/{oid}/plexes?fields=online,state,pool,resync,raid_groups&return_records=true&return_timeout=15'.format(url=baseUrl,oid=uuid), headers=auth)
             response = json.loads(response)
         except Exception, e:
             log.error('%s: %s', device.id, e)
@@ -96,6 +96,11 @@ class Storage(PythonPlugin):
             om = ObjectMap()
             om.modname = 'ZenPacks.CS.NetApp.CMode.Plex'
             om.id = self.prepId(record['name'])
+            om.plex_name = record['name']
+            om.online = record['online']
+            om.plex_state = record['state']
+            om.pool = record['pool']
+            om.resync = record['resync']['active']
             rm.append(om)
 
             compname = '{parent}/plexs/{id}'.format(parent=compname, id=om.id)
@@ -106,7 +111,7 @@ class Storage(PythonPlugin):
     @inlineCallbacks
     def volumes(self, device, uuid, baseUrl, auth, compname, log):
         try:
-            response = yield getPage('{url}/storage/volumes?fields=aggregates,statistics.status,error_state,snaplock,tiering,state,size,movement,space,application,nas,clone,flexcache_endpoint_type,autosize,style&return_records=true&return_timeout=15'.format(url=baseUrl,oid=uuid), headers=auth)
+            response = yield getPage('{url}/storage/volumes?fields=aggregates,name,uuid,space.size,state,style,tiering,type,svm.name,snapshot_policy.name,nas.path,clone,space.available,space.used,space.over_provisioned,space.snapshot.reserve_percent,nas.security_style&return_records=true&return_timeout=15'.format(url=baseUrl,oid=uuid), headers=auth)
             response = json.loads(response)
         except Exception, e:
             log.error('%s: %s', device.id, e)
@@ -122,7 +127,23 @@ class Storage(PythonPlugin):
             if uuid != record['aggregates'][0]['uuid']: continue
             om = ObjectMap()
             om.modname = 'ZenPacks.CS.NetApp.CMode.Volume'
-            om.id = self.prepId(record['name'])
+            om.id = self.prepId(record['uuid'])
+            om.volume_name = record['name']
+            om.volume_uuid = record['uuid']
+            om.state = record['state']
+            om.style = record['style']
+            om.tiering_policy = record['tiering']['policy']
+            om.type = record['type']
+            om.is_flexclone = record['clone']['is_flexclone']
+            om.nas_path = record['nas']['path']
+            om.nas_security_style = record['nas']['security_style']
+            om.snapshot_policy = record['snapshot_policy']['name']
+            om.svm = record['svm']['name']
+            om.size = record['space']['size']
+            om.available = record['space']['available']
+            om.used = record['space']['used']
+            om.over_provisioned = record['space']['over_provisioned']
+            om.snapshot_reserve = record['space']['snapshot']['reserve_percent']
             rm.append(om)
 
         returnValue(rm)

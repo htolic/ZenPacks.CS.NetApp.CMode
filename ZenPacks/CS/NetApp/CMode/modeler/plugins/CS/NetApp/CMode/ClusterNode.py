@@ -80,7 +80,7 @@ class ClusterNode(PythonPlugin):
     @inlineCallbacks
     def spares(self, device, uuid, baseUrl, auth, compname, log):
         try:
-            response = yield getPage('{url}/storage/disks?state=spare&fields=*&return_records=true&return_timeout=15'.format(url=baseUrl), headers=auth)
+            response = yield getPage('{url}/storage/disks?state=spare&fields=name,uid,serial_number,model,vendor,firmware_version,usable_size,rpm,type,class,pool,bay,node&return_records=true&return_timeout=15'.format(url=baseUrl), headers=auth)
             response = json.loads(response)
         except Exception, e:
             log.error('%s: %s', device.id, e)
@@ -93,9 +93,22 @@ class ClusterNode(PythonPlugin):
         rm.classname = 'SpareDisk'
 
         for record in response['records']:
+            if uuid != record['node']['uuid']: continue
             om = ObjectMap()
             om.modname = 'ZenPacks.CS.NetApp.CMode.SpareDisk'
-            om.id = self.prepId(record['serial_number'])
+            om.id = self.prepId(record['name'])
+            om.sparedisk_name = record['name']
+            om.disk_uid = record['uid']
+            om.serialnr = record['serial_number']
+            om.model = record['model']
+            om.vendor = record['vendor']
+            om.firmware = record['firmware_version']
+            om.usable_size = record['usable_size']
+            om.rpm = record['rpm']
+            om.type = record['type']
+            om.spare_class = record['class']
+            om.pool = record['pool']
+            om.bay = record['bay']
             rm.append(om)
         
         returnValue(rm)
