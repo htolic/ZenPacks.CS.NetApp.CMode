@@ -12,6 +12,24 @@ device_classes:
         - CS.NetApp.CMode.License
         - CS.NetApp.CMode.ClusterNode
         - CS.NetApp.CMode.Storage
+    templates:
+      Aggregate:
+        description: NetApp CMode Aggregates metrics
+        targetPythonClass: ZenPacks.CS.NetApp.CMode.Aggregate
+        datasources:
+          aggregate:
+            type: Python
+            plugin_classname: ZenPacks.CS.NetApp.CMode.dsplugins.Aggregates
+            cycletime: "30"
+            datapoints:
+              used: GAUGE
+        graphs:
+          Space Used:
+            units: B
+            graphpoints:
+              Used:
+                dpName: aggregate_used
+                format: "%7.2lf"
 
 zProperties:
   DEFAULTS:
