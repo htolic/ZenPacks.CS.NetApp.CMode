@@ -20,7 +20,6 @@ device_classes:
           aggregate:
             type: Python
             plugin_classname: ZenPacks.CS.NetApp.CMode.dsplugins.Aggregates
-            cycletime: "30"
             datapoints:
               used: GAUGE
         graphs:
@@ -29,6 +28,96 @@ device_classes:
             graphpoints:
               Used:
                 dpName: aggregate_used
+                format: "%7.2lf"
+      ClusterNode:
+        description: NetApp CMode Cluster Node metrics
+        targetPythonClass: ZenPacks.CS.NetApp.CMode.ClusterNode
+        datasources:
+          clusternode:
+            type: Python
+            plugin_classname: ZenPacks.CS.NetApp.CMode.dsplugins.ClusterNodes
+            datapoints:
+              uptime: GAUGE
+        graphs:
+          Node Uptime:
+            units: sec
+            graphpoints:
+              Uptime:
+                dpName: clusternode_uptime
+                format: "%7.2lf"
+      Volume:
+        description: NetApp CMode Volumes metrics
+        targetPythonClass: ZenPacks.CS.NetApp.CMode.Volume
+        datasources:
+          latency:
+            type: Python
+            plugin_classname: ZenPacks.CS.NetApp.CMode.dsplugins.Volumes
+            datapoints:
+              read: GAUGE
+              write: GAUGE
+              other: GAUGE
+              total: GAUGE
+          iops:
+            type: Python
+            plugin_classname: ZenPacks.CS.NetApp.CMode.dsplugins.Volumes
+            datapoints:
+              read: GAUGE
+              write: GAUGE
+              other: GAUGE
+              total: GAUGE
+          throughput:
+            type: Python
+            plugin_classname: ZenPacks.CS.NetApp.CMode.dsplugins.Volumes
+            datapoints:
+              read: GAUGE
+              write: GAUGE
+              other: GAUGE
+              total: GAUGE
+        graphs:
+          Latency:
+            units: μs
+            graphpoints:
+              Read:
+                dpName: latency_read
+                format: "%7.2lf"
+              Write:
+                dpName: latency_write
+                format: "%7.2lf"
+              Other:
+                dpName: latency_other
+                format: "%7.2lf"
+              Total:
+                dpName: latency_total
+                format: "%7.2lf"
+          IOPS:
+            units: rate
+            graphpoints:
+              Read:
+                dpName: iops_read
+                format: "%7.2lf"
+              Write:
+                dpName: iops_write
+                format: "%7.2lf"
+              Other:
+                dpName: iops_other
+                format: "%7.2lf"
+              Total:
+                dpName: iops_total
+                format: "%7.2lf"
+          Throughput:
+            units: bytes per sec
+            graphpoints:            
+              Read:
+                dpName: throughput_read
+                format: "%7.2lf"
+              Write:
+                dpName: throughput_write
+                format: "%7.2lf"
+              Other:
+                dpName: throughput_other
+                format: "%7.2lf"
+              Total:
+                dpName: throughput_total
                 format: "%7.2lf"
 
 zProperties:

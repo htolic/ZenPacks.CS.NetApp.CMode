@@ -84,3 +84,125 @@ class Aggregates(PythonDataSourcePlugin):
 
         returnValue(data)
 
+
+class ClusterNodes(PythonDataSourcePlugin):
+
+    """ClusterNodes data source plugin."""
+
+    @classmethod
+    def config_key(cls, datasource, context):
+        return (
+            context.device().id,
+            datasource.getCycleTime(context),
+            'netapp-clusternodes',
+        )
+
+    @classmethod
+    def params(cls, datasource, context):
+        return {
+            'ip': context.device().manageIp,
+            'api': context.zNetAppAPI,
+            'un': context.zNetAppUser,
+            'pw': context.zNetAppPassword,
+        }
+
+    @inlineCallbacks
+    def collect(self, config):
+        data = self.new_data()
+
+        params = config.datasources[0].params
+        baseUrl = params['api']
+        if not baseUrl:
+            if not params['ip']:
+                log.error("Please fill in zNetAppAPI property")
+                returnValue(None)
+            baseUrl = 'https://{ip}/api'.format(ip=params['ip'])
+
+        un = params['un']
+        pw = params['pw']
+        if un and pw:
+            basic = base64.encodestring('{un}:{pw}'.format(un=un, pw=pw))
+            auth = {'Authorization': 'Basic {b}'.format(b=basic.strip())}
+        else:
+            auth = {}
+            log.info(
+                'Please consider using zNetAppUser and zNetAppPassword for authorization')
+
+        try:
+            response = yield getPage('{url}/cluster/nodes?fields=uptime&return_records=true&return_timeout=15'.format(url=baseUrl), headers=auth)
+            response = json.loads(response)
+        except Exception, e:
+            log.error(e)
+            returnValue(None)
+
+        for datasource in config.datasources:
+            for record in response['records']:
+                if datasource.component == prepId(record['uuid']):
+                    for datapoint_id in (x.id for x in datasource.points):
+                        if datapoint_id == 'uptime':
+                            value = int(record['uptime'])
+                            dpname = '_'.join((datasource.datasource, datapoint_id))
+                            data['values'][datasource.component][dpname] = (value, 'N')
+
+        returnValue(data)
+
+class Volumes(PythonDataSourcePlugin):
+
+    """Volumes data source plugin."""
+
+    @classmethod
+    def config_key(cls, datasource, context):
+        return (
+            context.device().id,
+            datasource.getCycleTime(context),
+            'netapp-volumes',
+        )
+
+    @classmethod
+    def params(cls, datasource, context):
+        return {
+            'ip': context.device().manageIp,
+            'api': context.zNetAppAPI,
+            'un': context.zNetAppUser,
+            'pw': context.zNetAppPassword,
+        }
+
+    @inlineCallbacks
+    def collect(self, config):
+        data = self.new_data()
+
+        params = config.datasources[0].params
+        baseUrl = params['api']
+        if not baseUrl:
+            if not params['ip']:
+                log.error("Please fill in zNetAppAPI property")
+                returnValue(None)
+            baseUrl = 'https://{ip}/api'.format(ip=params['ip'])
+
+        un = params['un']
+        pw = params['pw']
+        if un and pw:
+            basic = base64.encodestring('{un}:{pw}'.format(un=un, pw=pw))
+            auth = {'Authorization': 'Basic {b}'.format(b=basic.strip())}
+        else:
+            auth = {}
+            log.info(
+                'Please consider using zNetAppUser and zNetAppPassword for authorization')
+
+        try:
+            response = yield getPage('{url}/storage/volumes?fields=metric&return_records=true&return_timeout=15'.format(url=baseUrl), headers=auth)
+            response = json.loads(response)
+        except Exception, e:
+            log.error(e)
+            returnValue(None)
+
+        for datasource in config.datasources:
+            for record in response['records']:
+                if datasource.component == prepId(record['uuid']):
+                    for datapoint_id in (x.id for x in datasource.points):
+                        value = int(record['metric'][datasource.datasource][datapoint_id])
+                        dpname = '_'.join((datasource.datasource, datapoint_id))
+                        data['values'][datasource.component][dpname] = (value, 'N')
+
+        returnValue(data)
+
