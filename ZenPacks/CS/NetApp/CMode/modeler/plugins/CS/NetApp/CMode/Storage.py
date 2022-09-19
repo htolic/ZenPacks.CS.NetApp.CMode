@@ -50,7 +50,7 @@ class Storage(PythonPlugin):
             log.info('Please consider using zNetAppUser and zNetAppPassword for authorization')
 
         try:
-            response = yield getPage('{url}/storage/aggregates?fields=name,state,block_storage.primary.raid_size,block_storage.primary.disk_count,plexes,space.block_storage.size&return_timeout=15'.format(url=baseUrl), headers=auth)
+            response = yield getPage('{url}/storage/aggregates?fields=name,state,block_storage.primary.raid_size,block_storage.primary.disk_count,space.block_storage.size&return_timeout=15'.format(url=baseUrl), headers=auth)
             response = json.loads(response)
         except Exception, e:
             log.error('%s: %s', device.id, e)
